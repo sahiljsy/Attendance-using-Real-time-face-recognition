@@ -19,5 +19,6 @@ import employees
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('employee/', include('employees.urls'))
+    path('', include('employees.urls')),
+    path('accounts/', include('allauth.urls')),
 ]

@@ -1,1 +1,5 @@
-<h1>Employee home page</h1>
+{% if user.is_authenticated %}
+<h1>{{ user.username }} home page</h1>
+{% else %}
+<h1>No User Found</h1>
+{% endif %}
