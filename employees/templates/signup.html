@@ -107,7 +107,7 @@
   <div class="container" style="margin: 1% auto;padding-top: 3%;padding-bottom: 3%;">
     <form method="post">
       {% csrf_token %}
-      <img src="{% static 'images/userlogo.png' %}" />
+      <img src="{% static 'images/user.png' %}" />
       <h2>User Registration</h2>
       <hr />
       {{ form|crispy }}
@@ -115,8 +115,8 @@
       
       <br /><br>
       <div class="button-holder">
-        <input type="submit">
-        {% comment %} <a href="{% provider_login_url 'google' %}"><button class="buttons">Sign In with Google</button></a> {% endcomment %}
+        <input type="submit" />
+        <a href="{% provider_login_url 'google' %}"><button class="buttons">Sign In with Google</button></a>
       </div>
     </form>
   </div>
