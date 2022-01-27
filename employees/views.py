@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from .forms import SignUpForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
@@ -36,4 +36,7 @@ def Login(request):
 
 def logout_view(request):
     logout(request)
-    return redirect('http://127.0.0.1:8000/')
+    return redirect('http://127.0.0.1:8000/accounts/login')
+
+def Display(request):
+    return render(request, 'display.html')
