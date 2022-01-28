@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+
 
 @login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def hello(request):
@@ -43,3 +45,6 @@ def logout_view(request):
 @login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def Display(request):
     return render(request, "display.html")
+
+def notFound(request):
+    return render(request, "404.html")

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{% block head_title %}{% endblock %}</title>
+    {% block extra_head %}
+    {% endblock %}
+    {% load static %}
+    <link 
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" 
+    crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/form.css' %}" />
+    <style>
+    img {
+        width: 22%;
+        height: 15%;
+        margin-left: 36.5%;
+        margin-right: 36.5%;
+    }
+      
+    .form-text {
+        color: white !important;
+    }
+      
+    .form {
+        width: 85%;
+        background-color: rgba(247, 243, 243, 0.3);
+        border-radius: 25px;
+        padding: 2%;
+        margin-left: auto;
+        margin-right: 5%;
+    }
+      
+    h2 {
+        text-align: center;
+        color: white;
+    }
+
+    .contain{
+        margin-top: 13%;
+        text-align: center;
+        color: white;
+        width: 55%;
+        margin-left: auto;
+        margin-right: auto;
+        background-color: rgba(247, 243, 243, 0.3);
+        border-radius: 25px;
+        padding: 2%;
+    }
+
+    button {
+        width: 85%;
+        background-color: rgb(243, 53, 53);
+        color: white;
+        padding: 12px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: rgb(204, 8, 8);
+      }
+      
+    @media screen and (min-width: 992px) {
+        .form-control {
+              width: 100%;
+        }
+      
+        .form {
+              width: 60%;
+              float: right;
+              padding: 2%;
+              margin-right: 0;
+        }
+      
+        .a{
+              margin-bottom: 1%;
+        }
+    }
+    </style> 
+        
+    <script
+    src="https://kit.fontawesome.com/6820971017.js"
+    crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+      <div class="contain">
+        <h1>Attendance Management System</h1>
+    {% block body %}
+
+    {% if messages %}
+    <div>
+      <strong>Messages:</strong>
+      <ul>
+        {% for message in messages %}
+        <li>{{message}}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% else %}
+    {% block content %}
+    {% endblock %}
+    {% endif %}
+    {% endblock %}
+    {% block extra_body %}
+    {% endblock %} 
+</div>
+  </body>
+</html>

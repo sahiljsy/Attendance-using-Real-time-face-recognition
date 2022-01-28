@@ -14,9 +14,24 @@
       crossorigin="anonymous"
     ></script>
     <style>
+      .form {
+        width: 80%;
+        margin-left: auto;
+        margin-right: 8%;
+      }
+
       h3 {
         text-align: center;
         color: white;
+      }
+
+      @media screen and (min-width: 992px) {
+        .form {
+          width: 40%;
+          float: right;
+          padding: 2%;
+          margin-right: 0;
+        }
       }
     </style>
   </head>
@@ -25,7 +40,7 @@
     {% load crispy_forms_tags %} {% load static %} {% load socialaccount %}
      {% comment %} {%include '../navbar.html' %} {% endcomment %}
     <div class="container" style="padding-top: 2%">
-      <div class="form">
+      <div class="form" style="">
         <form method="POST">
           {% csrf_token %}
           <img src="{% static 'images/user.png' %}" />

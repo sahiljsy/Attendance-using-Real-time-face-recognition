@@ -1,20 +1,12 @@
 .form-control {
   width: 100%;
 }
-.errorlist {
-  color: red;
-}
 
-.form-text {
-  color: red !important;
-  font-weight: bold;
-}
 label {
   margin-top: 4%;
   margin-bottom: 2%;
   font-size: large;
-  color: rgb(48, 3, 3);
-  font-weight: bolder;
+  color: white;
 }
 
 img {
