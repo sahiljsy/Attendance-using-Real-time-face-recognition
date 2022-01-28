@@ -35,3 +35,33 @@ hr{
     color:gray;
     background-color:gray
 }
+
+@media only screen and (max-width: 760px) {
+
+  #mypic {
+    height: 6rem;
+    width: 6rem;
+    margin: auto;
+    margin-top: 2%;
+  }
+
+  #detail-card{
+    width:85%;
+    margin:auto ;
+    margin-top: 3%;
+    height: auto;
+    opacity: .85;
+    border-radius: 5%;
+}
+  .bars {
+    display: block;
+  }
+  .nav-menu {
+    display: none;
+  }
+  .card-body{
+    /* max-height: 50px !important; */
+    min-height: 50px !important;
+  
+  }
+}

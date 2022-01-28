@@ -5,6 +5,7 @@ from .forms import SignUpForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
+# from allauth import Email_addresses
 
 def hello(request):
     return render(request, "home.html")

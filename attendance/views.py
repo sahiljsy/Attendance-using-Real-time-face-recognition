@@ -10,3 +10,21 @@ def person_report(request):
 
 def system_report(request):
     return render(request, "system_report.html")
+
+def mark_attendance(request):
+    return render(request, "mark_attendance.html")
+
+def take_data(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+
+        if username == "":
+            context = {'error': "Username required."}
+            return render(request, 'takedata.html', context)
+
+        if User.objects.filter(username=username).exists():
+            return render(request, "takedata.html")
+        else:
+            return render(request, "takedata.html")
+    else:
+        return render(request, "takedata.html")
