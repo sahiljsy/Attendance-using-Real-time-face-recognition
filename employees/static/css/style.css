@@ -7,17 +7,19 @@ body {
   background-attachment: fixed;
 }
 .bars {
-  color: red;
+  color: white;
   margin: 0;
   margin-right: 5%;
-  /* display: none; */
+  display: none;
 }
 
 .bars i {
   font-size: 2rem;
+  display: block;
 }
 
 .dropdown-list {
+  z-index: 1;
   margin: 0;
   display: none;
   background-color: #828470;
@@ -30,7 +32,7 @@ body {
   padding: 0px 0.8rem;
 }
 
-.dropdown-menu:hover .dropdown-list {
+.bars-menu:hover .dropdown-list {
   display: block;
   position: absolute;
   right: 3%;
@@ -39,7 +41,6 @@ body {
 .dropdown-list li {
   margin: 0.4rem 0px;
 }
-
 .no-list-style {
   list-style: none;
   /* background-color: black; */
@@ -95,29 +96,29 @@ body {
   .nav-menu {
     display: none;
   }
-  .card-body{
-    max-height: 50px !important;
-    min-height: 50px !important;
-  
+  .card-body {
+    max-height: 50px;
+    min-height: 50px;
   }
 }
 .card {
   background-color: white;
   border-radius: 5%;
+  /* box-shadow: 7px 10px 5px  rgb(190, 160, 148); */
+  box-shadow: 5px 10px 10px rgb(46, 46, 102);
 }
 .card-img-top {
   text-align: center;
   width: 100%;
   height: 200px;
-  /* object-fit: cover; */
   margin: auto;
   border-radius: 5%;
 }
 
-a{
+a {
   text-decoration: none;
-  color:black;
+  color: black;
 }
-a:hover{
-  color:red;
+a:hover {
+  color: red;
 }

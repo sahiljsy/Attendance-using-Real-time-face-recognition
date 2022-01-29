@@ -7,5 +7,6 @@ urlpatterns = [
     path('login/', views.Login),
     path('display/', views.Display),
     path('logout/', views.logout_view),
+    path('error/404',views.notFound)
     
 ]

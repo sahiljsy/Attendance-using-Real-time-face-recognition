@@ -5,10 +5,13 @@ from .forms import SignUpForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
-# from allauth import Email_addresses
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 
+
+@login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def hello(request):
-    return render(request, "home.html")
+        return render(request, "home.html")
 
 def signup(request):
     if request.method == 'POST':
@@ -39,5 +42,9 @@ def logout_view(request):
     logout(request)
     return redirect('http://127.0.0.1:8000/accounts/login')
 
+@login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def Display(request):
-    return render(request, 'display.html')
+    return render(request, "display.html")
+
+def notFound(request):
+    return render(request, "404.html")

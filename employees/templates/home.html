@@ -24,7 +24,9 @@
   <body>
     {% load crispy_forms_tags %} {% load static %} {% load socialaccount %}
     {%include 'navbar.html' %}
+    
     <div class="container">
+      {% if user.is_superuser%}
       <div class="row">
         <div class="col-sm-4 my-5">
           <div class="card-group">
@@ -46,6 +48,7 @@
             </div>
           </div>
         </div>
+        
         <div class="col-sm-4 my-5">
           <div class="card-group">
             <div class="card">
@@ -86,6 +89,7 @@
             </div>
           </div>
         </div>
+        
       </div>
 
       <div class="row">
@@ -150,6 +154,9 @@
           </div>
         </div>
       </div>
+      {% else %}
+      {%include 'user_home.html' %}
+      {% endif %}
     </div>
   </body>
 </html>

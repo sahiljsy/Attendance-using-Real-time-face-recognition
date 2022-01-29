@@ -7,4 +7,5 @@ urlpatterns = [
     path('report/system', views.system_report),
     path('takedata', views.take_data),
     path('markattendance', views.mark_attendance),
+    
 ]
