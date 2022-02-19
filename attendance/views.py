@@ -7,6 +7,12 @@ import cv2
 import dlib
 import threading
 import os
+from os.path import isfile, join
+import numpy as np
+from sklearn.preprocessing import LabelEncoder
+from sklearn.naive_bayes import GaussianNB
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
 
 
 @login_required(login_url="http://127.0.0.1:8000/accounts/login/")
@@ -64,6 +70,7 @@ def create_dataset(username):
         cap.release()
         cv2.destroyAllWindows()
         print("Working")
+
     except Exception as e:
         cap.release()
         cv2.destroyAllWindows()
@@ -89,3 +96,40 @@ def take_data(request):
             return render(request, "takedata.html", context)
     else:
         return render(request, "takedata.html")
+
+
+def trainmodel(request):
+    data_path = "./data/"
+    Training_Data = []
+    Labels = []
+    onlyfiles = [f for f in os.listdir(
+        data_path) if isfile(join(data_path, f))]
+
+    for i, files in enumerate(onlyfiles):
+        image_path = data_path + onlyfiles[i]
+        images = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+        Labels.append(onlyfiles[i].split("_")[0])
+        Training_Data.append(np.asarray(images, dtype=np.uint8))
+
+    print(np.asarray(Training_Data))
+    lbl_en = LabelEncoder()
+    encoded_lbls = lbl_en.fit_transform(Labels)
+    print(encoded_lbls)
+
+    unique_lbls = np.unique(np.array(encoded_lbls))
+    # print(unique_lbls)
+    data_train, data_test, target_train, target_test = train_test_split(
+        np.asarray(Training_Data), encoded_lbls, test_size=0.20, random_state=58)
+    nsamples, nx, ny = data_train.shape
+    d2_train_dataset = data_train.reshape((nsamples, nx*ny))
+    nsamples, nx, ny = data_test.shape
+    d2_test_dataset = data_test.reshape((nsamples, nx*ny))
+    gnb = GaussianNB()
+    gnb.fit(d2_train_dataset, target_train)
+    target_pred = gnb.predict(d2_test_dataset)
+    print("Accuracy:", metrics.accuracy_score(target_test, target_pred))
+    precision = metrics.precision_score(target_test, target_pred, average=None)
+    recall = metrics.recall_score(target_test, target_pred, average=None)
+    print('precision: {}'.format(precision))
+    print('recall: {}'.format(recall))
+    return redirect("http://127.0.0.1:8000/")
