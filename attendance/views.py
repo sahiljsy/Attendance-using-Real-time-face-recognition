@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect,StreamingHttpResponse
+from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import Http404
 import cv2
+import dlib
 import threading
 import os
 
@@ -26,34 +27,39 @@ def system_report(request):
 def mark_attendance(request):
     return render(request, "mark_attendance.html")
 
+
 def create_dataset(username):
     try:
-        if(os.path.exists('./data')==False):
+        if(os.path.exists('./data') == False):
             os.makedirs('./data')
         cap = cv2.VideoCapture(0)
         print("Camera opened")
-        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-        print("xml loaded")
-        skip = 0 
+        hogFaceDetector = dlib.get_frontal_face_detector()
+        skip = 0
         while True:
-            ret, frame = cap.read()
-            if ret == False:
-                continue
-            cv2.imshow("Face Section", frame)
-            faces = face_cascade.detectMultiScale(frame, 1.3, 5)
-            if len(faces) > 0:
-                for (x,y,w,h) in faces:
-                    face_cropped = frame[y-10:y+h+10, x-10:x+w+10]
-                    frame = face_cropped
-                    face_cropped = cv2.resize(face_cropped, (450,450))
-                    face_cropped = cv2.cvtColor(face_cropped, cv2.COLOR_BGR2GRAY)
-                    skip = skip+1
-                    if skip % 10 == 0:
-                        file_path = "./data/"+username+"_"+str(int(skip/10))+".jpg"
-                        cv2.imwrite(file_path, face_cropped)
-                    cv2.imshow("Face Section", face_cropped)
+            _, frame = cap.read()
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            faces = hogFaceDetector(gray, 1)
+            for (i, rect) in enumerate(faces):
+                x = rect.left()
+                y = rect.top()
+                w = rect.right() - x
+                h = rect.bottom() - y
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                face_cropped = frame[y-5:y+h-5, x-5:x+w-5]
+                face_cropped = cv2.resize(face_cropped, (64, 64))
+                face_cropped = cv2.cvtColor(face_cropped, cv2.COLOR_BGR2GRAY)
+                skip = skip+1
+                if skip % 10 == 0:
+                    file_path = "./data/"+username + \
+                        "_"+str(int(skip/10))+".jpg"
+                    cv2.imwrite(file_path, face_cropped)
+            # draw a rectangle
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            cv2.imshow("Face Landmarks", frame)
+
             key = cv2.waitKey(1) & 0xFF
-            if key == ord('q') or skip==150:
+            if key == ord('q') or skip == 150:
                 break
         cap.release()
         cv2.destroyAllWindows()
