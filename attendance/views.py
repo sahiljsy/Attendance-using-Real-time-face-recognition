@@ -10,15 +10,16 @@ import csv
 from datetime import datetime
 from os.path import isfile, join, exists
 import numpy as np
+from rsa import verify
 from sklearn.model_selection import train_test_split
 from django.contrib import messages
 import keras
-from keras.models import load_model
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten, Activation
-from keras.layers import Conv2D, MaxPooling2D, BatchNormalization
+from keras.layers import Dense, Dropout, Flatten
+from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 from django.http import HttpResponse
+from django.conf import settings
 
 
 @login_required(login_url="http://127.0.0.1:8000/accounts/login/")
@@ -36,21 +37,78 @@ def system_report(request):
     return render(request, "system_report.html")
 
 
+def markmyAttendanceIn(name):
+    if exists('attendance.csv') == False:
+        print("if")
+        with open('attendance.csv', 'w+', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(
+                ["Username", "Date", "Check_in_time", "Check_out_time"])
+            now = datetime.now()
+            dateString = now.strftime('%d-%b-%y')
+            timeString = now.strftime('%H:%M:%S')
+            writer.writerow([name, dateString, timeString])
+    else:
+        print("else")
+        with open('attendance.csv', 'r+', newline='') as file:
+            data = file.readlines()
+            namesList = []
+            for line in data:
+                entry = line.split(',')
+                namesList.append(entry[0])
+            if name not in namesList:
+                now = datetime.now()
+                dateString = now.strftime('%d-%b-%y')
+                timeString = now.strftime('%H:%M:%S')
+                file.writelines(f'\n{name},{dateString},{timeString}')
 
 
+def update(header, data, filename):
+    with open(filename, "w", newline="") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=header)
+        writer.writeheader()
+        writer.writerows(data)
+
+
+def markmyAttendanceOut(name):
+    if exists('attendance.csv'):
+        with open('attendance.csv', newline='') as file:
+            reader = [row for row in csv.DictReader(file)]
+            readHeader = reader[0].keys()
+            flag = False
+            now = datetime.now()
+            dateString = now.strftime('%d-%b-%y')
+            timeString = now.strftime('%H:%M:%S')
+            for row in reader:
+                if row['Username'] == name and row['Date'] == dateString and row['Check_in_time'] != None and row['Check_out_time'] == None:
+                    flag = True
+                    row['Check_out_time'] = timeString
+            print(flag)
+            if flag:
+                writer(readHeader, reader, 'attendance.csv')
+            else:
+                print("First cehck in or You have already Check out")
+    else:
+        print("First cehck in")
+
+
+@login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def checkin(request):
     try:
         data_path = "./data/"
         Training_Data = []
         Labels = []
+        verify = []
         img_rows, img_cols = 128, 128
         onlyfiles = [f for f in os.listdir(
             data_path) if isfile(join(data_path, f))]
-        # print(onlyfiles)
 
         for i, files in enumerate(onlyfiles):
             image_path = data_path + onlyfiles[i]
             images = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+            name = onlyfiles[i].split("_")
+            name.pop()
+            Labels.append('_'.join(name))
             Labels.append(onlyfiles[i].split("_")[0])
             Training_Data.append(np.asarray(images, dtype=np.uint8))
 
@@ -68,12 +126,12 @@ def checkin(request):
         for i in Labels:
             Enc_labels.append(Encoded_dict[i])
         no_of_labels = len(Encoded_labels)
-        model = load_model("cnn.h5")
         cap = cv2.VideoCapture(0)
         print("Camera opened")
         hogFaceDetector = dlib.get_frontal_face_detector()
-
+        cnt = 0
         while True:
+            cnt = cnt + 1
             _, frame = cap.read()
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             faces = hogFaceDetector(gray, 1)
@@ -89,20 +147,34 @@ def checkin(request):
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 face_cropped = (face_cropped/255)
                 inp = face_cropped.reshape(1, img_rows, img_cols, 1)
-
-                ynew = model.predict(inp)
+                ynew = settings.MODEL.predict(inp)
                 classes_x = np.argmax(ynew, axis=1)
-                color = (255,0, 0)
-                text = "Hello, " + Encoded_labels[classes_x[0]] + " Successfully checked in."
+                verify.append(Encoded_labels[classes_x[0]])
+                color = (0, 0, 255)
+                text = "Hello user, Please see towards camera with"
+                cv2.putText(frame, text,
+                            (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
+                text = "proper lighting for proper face recognition."
                 cv2.putText(frame, text,
                             (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
             cv2.imshow("Face Landmarks", frame)
-                # print(ynew[0])
             key = cv2.waitKey(1) & 0xFF
-            if key == ord('q'):
+            if cnt == 30:  # key == ord('q') or
                 break
         cap.release()
         cv2.destroyAllWindows()
+        best_prediction = max(set(verify), key=verify.count)
+        print(set(verify))
+        if(request.user.username == best_prediction):
+            print("Valid")
+            markmyAttendanceIn(best_prediction)
+            messages.add_message(
+                request, 25, best_prediction + ', you have successfully checked in.')
+        else:
+            print("Invalid")
+            messages.add_message(
+                request, 25, 'Sorry, something went wrong while checking in.')
+
         print("over")
     except Exception as e:
         cap.release()
@@ -111,20 +183,23 @@ def checkin(request):
     return redirect("http://127.0.0.1:8000/attendance/markattendance")
 
 
-
+@login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def checkout(request):
     try:
         data_path = "./data/"
         Training_Data = []
         Labels = []
+        verify = []
         img_rows, img_cols = 128, 128
         onlyfiles = [f for f in os.listdir(
             data_path) if isfile(join(data_path, f))]
-        # print(onlyfiles)
 
         for i, files in enumerate(onlyfiles):
             image_path = data_path + onlyfiles[i]
             images = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+            name = onlyfiles[i].split("_")
+            name.pop()
+            Labels.append('_'.join(name))
             Labels.append(onlyfiles[i].split("_")[0])
             Training_Data.append(np.asarray(images, dtype=np.uint8))
 
@@ -142,12 +217,12 @@ def checkout(request):
         for i in Labels:
             Enc_labels.append(Encoded_dict[i])
         no_of_labels = len(Encoded_labels)
-        model = load_model("cnn.h5")
         cap = cv2.VideoCapture(0)
         print("Camera opened")
         hogFaceDetector = dlib.get_frontal_face_detector()
-
+        cnt = 0
         while True:
+            cnt = cnt + 1
             _, frame = cap.read()
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             faces = hogFaceDetector(gray, 1)
@@ -163,20 +238,34 @@ def checkout(request):
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 face_cropped = (face_cropped/255)
                 inp = face_cropped.reshape(1, img_rows, img_cols, 1)
-
-                ynew = model.predict(inp)
+                ynew = settings.MODEL.predict(inp)
                 classes_x = np.argmax(ynew, axis=1)
+                verify.append(Encoded_labels[classes_x[0]])
                 color = (0, 0, 255)
-                text = "Hello, " + Encoded_labels[classes_x[0]] + " Successfully checked out."
+                text = "Hello user, Please see towards camera with"
                 cv2.putText(frame, text,
-                            (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
+                            (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
+                text = "proper lighting for proper face recognition."
+                cv2.putText(frame, text,
+                            (30, 65), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
             cv2.imshow("Face Landmarks", frame)
-                # print(ynew[0])
             key = cv2.waitKey(1) & 0xFF
-            if key == ord('q'):
+            if cnt == 30:  # key == ord('q') or
                 break
         cap.release()
         cv2.destroyAllWindows()
+        best_prediction = max(set(verify), key=verify.count)
+        print(verify)
+        if(request.user.username == best_prediction):
+            print("Valid")
+            markmyAttendanceOut(best_prediction)
+            messages.add_message(
+                request, 25, best_prediction + ', you have successfully checked out.')
+        else:
+            print("Invalid")
+            messages.add_message(
+                request, 25, 'Sorry, something went wrong while checking out.')
+
         print("over")
     except Exception as e:
         cap.release()
@@ -185,6 +274,7 @@ def checkout(request):
     return redirect("http://127.0.0.1:8000/attendance/markattendance")
 
 
+@login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def mark_attendance(request):
     return render(request, "mark_attendance.html")
 
@@ -232,6 +322,7 @@ def create_dataset(username):
     return
 
 
+@login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def take_data(request):
     if not request.user.is_staff:
         return redirect("http://127.0.0.1:8000/error/404")
@@ -252,6 +343,7 @@ def take_data(request):
         return render(request, "takedata.html")
 
 
+@login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def trainmodel(request):
     try:
         data_path = "./data/"
@@ -306,11 +398,11 @@ def trainmodel(request):
 
         model = Sequential()
         model.add(Conv2D(filters=40, kernel_size=(3, 3), padding='Same',
-                activation='relu', input_shape=(128, 128, 1)))
+                         activation='relu', input_shape=(128, 128, 1)))
         model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Dropout(0.25))
         model.add(Conv2D(filters=60, kernel_size=(2, 2),
-                padding='Same', activation='relu'))
+                         padding='Same', activation='relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Dropout(0.25))
         model.add(Conv2D(filters=160, kernel_size=(
@@ -320,7 +412,7 @@ def trainmodel(request):
         model.add(Dropout(0.5))
         model.add(Dense(no_of_labels, activation="softmax"))
         model.compile(optimizer='adam',
-                    loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+                      loss='sparse_categorical_crossentropy', metrics=['accuracy'])
         model.summary()
         model.fit(x=x_train, y=y_train, epochs=20)
 
