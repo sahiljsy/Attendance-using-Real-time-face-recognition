@@ -6,7 +6,9 @@ from django.http import Http404
 import cv2
 import dlib
 import os
-from os.path import isfile, join
+import csv
+from datetime import datetime
+from os.path import isfile, join, exists
 import numpy as np
 from sklearn.model_selection import train_test_split
 from django.contrib import messages
@@ -32,6 +34,8 @@ def person_report(request):
 @login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def system_report(request):
     return render(request, "system_report.html")
+
+
 
 
 def checkin(request):
@@ -92,7 +96,7 @@ def checkin(request):
                 text = "Hello, " + Encoded_labels[classes_x[0]] + " Successfully checked in."
                 cv2.putText(frame, text,
                             (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
-                cv2.imshow("Face Landmarks", frame)
+            cv2.imshow("Face Landmarks", frame)
                 # print(ynew[0])
             key = cv2.waitKey(1) & 0xFF
             if key == ord('q'):
@@ -166,7 +170,7 @@ def checkout(request):
                 text = "Hello, " + Encoded_labels[classes_x[0]] + " Successfully checked out."
                 cv2.putText(frame, text,
                             (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
-                cv2.imshow("Face Landmarks", frame)
+            cv2.imshow("Face Landmarks", frame)
                 # print(ynew[0])
             key = cv2.waitKey(1) & 0xFF
             if key == ord('q'):
@@ -210,8 +214,8 @@ def create_dataset(username):
                 file_path = "./data/"+username + \
                     "_"+str(int(skip))+".jpg"
                 cv2.imwrite(file_path, face_cropped)
-            # draw a rectangle
-            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                # draw a rectangle
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
             cv2.imshow("Face Landmarks", frame)
 
             key = cv2.waitKey(1) & 0xFF
