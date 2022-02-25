@@ -8,15 +8,16 @@ import dlib
 import os
 from os.path import isfile, join
 import numpy as np
+from rsa import verify
 from sklearn.model_selection import train_test_split
 from django.contrib import messages
 import keras
-from keras.models import load_model
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten, Activation
-from keras.layers import Conv2D, MaxPooling2D, BatchNormalization
+from keras.layers import Dense, Dropout, Flatten
+from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 from django.http import HttpResponse
+from django.conf import settings
 
 
 @login_required(login_url="http://127.0.0.1:8000/accounts/login/")
@@ -33,20 +34,23 @@ def person_report(request):
 def system_report(request):
     return render(request, "system_report.html")
 
-
+@login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def checkin(request):
     try:
         data_path = "./data/"
         Training_Data = []
         Labels = []
+        verify = []
         img_rows, img_cols = 128, 128
         onlyfiles = [f for f in os.listdir(
             data_path) if isfile(join(data_path, f))]
-        # print(onlyfiles)
-
+        
         for i, files in enumerate(onlyfiles):
             image_path = data_path + onlyfiles[i]
             images = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+            name = onlyfiles[i].split("_")
+            name.pop()
+            Labels.append('_'.join(name))
             Labels.append(onlyfiles[i].split("_")[0])
             Training_Data.append(np.asarray(images, dtype=np.uint8))
 
@@ -64,12 +68,12 @@ def checkin(request):
         for i in Labels:
             Enc_labels.append(Encoded_dict[i])
         no_of_labels = len(Encoded_labels)
-        model = load_model("cnn.h5")
         cap = cv2.VideoCapture(0)
         print("Camera opened")
         hogFaceDetector = dlib.get_frontal_face_detector()
-
+        cnt = 0
         while True:
+            cnt = cnt + 1
             _, frame = cap.read()
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             faces = hogFaceDetector(gray, 1)
@@ -85,20 +89,31 @@ def checkin(request):
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 face_cropped = (face_cropped/255)
                 inp = face_cropped.reshape(1, img_rows, img_cols, 1)
-
-                ynew = model.predict(inp)
+                ynew = settings.MODEL.predict(inp)
                 classes_x = np.argmax(ynew, axis=1)
-                color = (255,0, 0)
-                text = "Hello, " + Encoded_labels[classes_x[0]] + " Successfully checked in."
+                verify.append(Encoded_labels[classes_x[0]])
+                color = (0, 0, 255)
+                text = "Hello user, Please see towards camera with"
                 cv2.putText(frame, text,
-                            (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
+                            (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
+                text = "proper lighting for proper face recognition."
+                cv2.putText(frame, text,
+                            (30, 65), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
                 cv2.imshow("Face Landmarks", frame)
-                # print(ynew[0])
             key = cv2.waitKey(1) & 0xFF
-            if key == ord('q'):
+            if cnt == 30:  #key == ord('q') or 
                 break
         cap.release()
         cv2.destroyAllWindows()
+        best_prediction = max(set(verify), key = verify.count)
+        print(set(verify))
+        if(request.user.username == best_prediction):
+            print("Valid")
+            messages.add_message(request, 25, best_prediction +', you have successfully checked in.')
+        else:
+            print("Invalid")
+            messages.add_message(request, 25, 'Sorry, something went wrong while checking in.')
+        
         print("over")
     except Exception as e:
         cap.release()
@@ -108,19 +123,23 @@ def checkin(request):
 
 
 
+@login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def checkout(request):
     try:
         data_path = "./data/"
         Training_Data = []
         Labels = []
+        verify = []
         img_rows, img_cols = 128, 128
         onlyfiles = [f for f in os.listdir(
             data_path) if isfile(join(data_path, f))]
-        # print(onlyfiles)
-
+        
         for i, files in enumerate(onlyfiles):
             image_path = data_path + onlyfiles[i]
             images = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+            name = onlyfiles[i].split("_")
+            name.pop()
+            Labels.append('_'.join(name))
             Labels.append(onlyfiles[i].split("_")[0])
             Training_Data.append(np.asarray(images, dtype=np.uint8))
 
@@ -138,12 +157,12 @@ def checkout(request):
         for i in Labels:
             Enc_labels.append(Encoded_dict[i])
         no_of_labels = len(Encoded_labels)
-        model = load_model("cnn.h5")
         cap = cv2.VideoCapture(0)
         print("Camera opened")
         hogFaceDetector = dlib.get_frontal_face_detector()
-
+        cnt = 0
         while True:
+            cnt = cnt + 1
             _, frame = cap.read()
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             faces = hogFaceDetector(gray, 1)
@@ -159,20 +178,31 @@ def checkout(request):
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 face_cropped = (face_cropped/255)
                 inp = face_cropped.reshape(1, img_rows, img_cols, 1)
-
-                ynew = model.predict(inp)
+                ynew = settings.MODEL.predict(inp)
                 classes_x = np.argmax(ynew, axis=1)
+                verify.append(Encoded_labels[classes_x[0]])
                 color = (0, 0, 255)
-                text = "Hello, " + Encoded_labels[classes_x[0]] + " Successfully checked out."
+                text = "Hello user, Please see towards camera with"
                 cv2.putText(frame, text,
-                            (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
+                            (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
+                text = "proper lighting for proper face recognition."
+                cv2.putText(frame, text,
+                            (30, 65), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
                 cv2.imshow("Face Landmarks", frame)
-                # print(ynew[0])
             key = cv2.waitKey(1) & 0xFF
-            if key == ord('q'):
+            if cnt == 30:  #key == ord('q') or 
                 break
         cap.release()
         cv2.destroyAllWindows()
+        best_prediction = max(set(verify), key = verify.count)
+        print(verify)
+        if(request.user.username == best_prediction):
+            print("Valid")
+            messages.add_message(request, 25, best_prediction +', you have successfully checked out.')
+        else:
+            print("Invalid")
+            messages.add_message(request, 25, 'Sorry, something went wrong while checking out.')
+        
         print("over")
     except Exception as e:
         cap.release()
@@ -180,10 +210,9 @@ def checkout(request):
         print("Error occured: ", e)
     return redirect("http://127.0.0.1:8000/attendance/markattendance")
 
-
+@login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def mark_attendance(request):
     return render(request, "mark_attendance.html")
-
 
 def create_dataset(username):
     try:
@@ -227,7 +256,7 @@ def create_dataset(username):
         print("Error occured: ", e)
     return
 
-
+@login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def take_data(request):
     if not request.user.is_staff:
         return redirect("http://127.0.0.1:8000/error/404")
@@ -248,6 +277,7 @@ def take_data(request):
         return render(request, "takedata.html")
 
 
+@login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def trainmodel(request):
     try:
         data_path = "./data/"
