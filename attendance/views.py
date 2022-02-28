@@ -3,11 +3,14 @@ from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import Http404
+import matplotlib.pyplot as plt
+import pandas as pd
+from datetime import datetime
+import matplotlib.dates as mdates
 import cv2
 import dlib
 import os
 import csv
-from datetime import datetime
 from os.path import isfile, join, exists
 import numpy as np
 from rsa import verify
@@ -51,16 +54,17 @@ def markmyAttendanceIn(name):
     else:
         print("else")
         with open('attendance.csv', 'r+', newline='') as file:
-            data = file.readlines()
-            namesList = []
-            for line in data:
-                entry = line.split(',')
-                namesList.append(entry[0])
-            if name not in namesList:
-                now = datetime.now()
-                dateString = now.strftime('%d-%b-%y')
-                timeString = now.strftime('%H:%M:%S')
-                file.writelines(f'\n{name},{dateString},{timeString}')
+            reader = [row for row in csv.DictReader(file)]
+            now = datetime.now()
+            dateString = now.strftime('%d-%b-%y')
+            timeString = now.strftime('%H:%M:%S')
+            flag = True
+            for row in reader:
+                if row['Username'] == name and row['Date'] == dateString:
+                    flag = False
+            if flag:
+                print("new")
+                file.writelines(f'{name},{dateString},{timeString}')
 
 
 def update(header, data, filename):
@@ -85,7 +89,7 @@ def markmyAttendanceOut(name):
                     row['Check_out_time'] = timeString
             print(flag)
             if flag:
-                writer(readHeader, reader, 'attendance.csv')
+                update(readHeader, reader, 'attendance.csv')
             else:
                 print("First cehck in or You have already Check out")
     else:
@@ -131,7 +135,7 @@ def checkin(request):
         hogFaceDetector = dlib.get_frontal_face_detector()
         cnt = 0
         while True:
-            cnt = cnt + 1
+
             _, frame = cap.read()
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             faces = hogFaceDetector(gray, 1)
@@ -157,6 +161,7 @@ def checkin(request):
                 text = "proper lighting for proper face recognition."
                 cv2.putText(frame, text,
                             (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
+                cnt = cnt + 1
             cv2.imshow("Face Landmarks", frame)
             key = cv2.waitKey(1) & 0xFF
             if cnt == 30:  # key == ord('q') or
@@ -222,7 +227,7 @@ def checkout(request):
         hogFaceDetector = dlib.get_frontal_face_detector()
         cnt = 0
         while True:
-            cnt = cnt + 1
+
             _, frame = cap.read()
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             faces = hogFaceDetector(gray, 1)
@@ -248,6 +253,7 @@ def checkout(request):
                 text = "proper lighting for proper face recognition."
                 cv2.putText(frame, text,
                             (30, 65), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
+                cnt = cnt + 1
             cv2.imshow("Face Landmarks", frame)
             key = cv2.waitKey(1) & 0xFF
             if cnt == 30:  # key == ord('q') or
