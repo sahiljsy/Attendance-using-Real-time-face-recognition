@@ -1,0 +1,124 @@
+body {
+  height: 100%;
+  margin: 0;
+  background-image: url("../images/bakc1.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+}
+.bars {
+  color: white;
+  margin: 0;
+  margin-right: 5%;
+  display: none;
+}
+
+.bars i {
+  font-size: 2rem;
+  display: block;
+}
+
+.dropdown-list {
+  z-index: 1;
+  margin: 0;
+  display: none;
+  background-color: #828470;
+  box-shadow: 0px 4px 8px 1px #535547;
+}
+
+.dropdown-list ul {
+  margin: 0.2rem 0.2rem;
+  text-align: left;
+  padding: 0px 0.8rem;
+}
+
+.bars-menu:hover .dropdown-list {
+  display: block;
+  position: absolute;
+  right: 3%;
+}
+
+.dropdown-list li {
+  margin: 0.4rem 0px;
+}
+.no-list-style {
+  list-style: none;
+  /* background-color: black; */
+}
+
+.no-list-style li {
+  font-weight: 100;
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+.no-list-style li a {
+  list-style: none;
+  color: red;
+  text-decoration: none;
+  border-bottom: 2.5px solid white;
+}
+
+.horizontal-list {
+  padding-left: 0px;
+  margin: 0px;
+}
+
+.horizontal-list li {
+  display: inline-block;
+  margin: 0px 15px 15px 0px;
+}
+
+.nav-menu li a {
+  transition: all 1s ease-out;
+}
+
+.nav-menu li a:hover {
+  box-shadow: 0px 0px 6px 6px rgb(221, 149, 149);
+  color: lightgrey;
+  border-bottom: 2.5px solid black;
+}
+
+#body-header {
+  padding-top: 1rem;
+}
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+@media only screen and (max-width: 760px) {
+  .bars {
+    display: block;
+  }
+  .nav-menu {
+    display: none;
+  }
+  .card-body {
+    max-height: 50px;
+    min-height: 50px;
+  }
+}
+.card {
+  background-color: white;
+  border-radius: 5%;
+  /* box-shadow: 7px 10px 5px  rgb(190, 160, 148); */
+  box-shadow: 5px 10px 10px rgb(46, 46, 102);
+}
+.card-img-top {
+  text-align: center;
+  width: 100%;
+  height: 200px;
+  margin: auto;
+  border-radius: 5%;
+}
+
+a {
+  text-decoration: none;
+  color: black;
+}
+a:hover {
+  color: red;
+}

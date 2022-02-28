@@ -1,0 +1,65 @@
+<html>
+  <head>
+    {% load static %}
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <script
+      src="https://kit.fontawesome.com/6820971017.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+
+  <body>
+    {% load crispy_forms_tags %} {% load static %} {% load socialaccount %}
+    {%include 'navbar.html' %}
+    <div class="container">
+        <div class="row">
+          <div class="col my-5">
+            <div class="card-group">
+              <div class="card">
+                <a href="http://127.0.0.1:8000/attendance/report/person">
+                  <div class="card-header">
+                    <img
+                      class="card-img-top"
+                      src="{% static 'images/personreport.jpg' %}"
+                      alt="Card image cap"
+                    />
+                  </div>
+                  <div class="card-body">
+                    <center>
+                      <h1>EMPLOYEE REPORT</h1>
+                    </center>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col my-5">
+            <div class="card-group">
+              <div class="card">
+                <a href="http://127.0.0.1:8000/attendance/report/system">
+                  <div class="card-header">
+                    <img
+                      class="card-img-top"
+                      src="{% static 'images/systemreport.jpg' %}"
+                      alt="Card image cap"
+                    />
+                  </div>
+                  <div class="card-body">
+                    <center>
+                      <h1>SYSTEM REPORT</h1>
+                    </center>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+  </body>
+</html>
