@@ -14,15 +14,16 @@
       crossorigin="anonymous"
     ></script>
     <style>
-      h3 {
-        text-align: center;
-        color: white;
+      #detail-card{
+          padding: 2%;
+          width: 65%;
       }
     </style>
   </head>
 
   <body>
     {% load crispy_forms_tags %} {% load static %} {% load socialaccount %}
+    {% include 'messages.html' %}
     {%include 'navbar.html' %}
     <div class="container">
       <div class="row">
@@ -32,13 +33,18 @@
               <img src="{% static 'images/profile.jpeg' %}" />
             </div>
             <hr style="height: 3px;background-color:black"/ >
-            <div >
-              <p>USER NAME: {{user.username}}</p>
-              <p>FIRST NAME: {{user.first_name}}</p>
-              <p>LAST NAME: {{user.last_name}}</p>
-              <p>EMAIL: {{user.email}}</p>
-            </div>
-            {% comment %} <button type="button" class="btn btn-warning"><a href="">UPDATE</a></button> {% endcomment %}
+            <form method="POST" action="http://127.0.0.1:8000/updatedetails/"> {% csrf_token %}
+                <hr>
+                <label class="form-label">Username: </label>
+                <input type="text" class="form-control" name="usernm" value="{{user.username}}" disabled><br>
+                <label class="form-label">Email Address: </label>
+                <input type="text"class="form-control" name="email" value="{{user.email}}" disabled><br>
+                <label class="form-label">First Name: </label>
+                <input type="text" class="form-control" name="first" value="{{user.first_name}}"><br>
+                <label for="last-name" class="form-label">Last Name: </label>
+                <input type="text" class="form-control" name="last" value="{{user.last_name}}"><br><br>
+                <center><button type="submit" class="btn btn-success">Update</button></center>
+            </form>
           </div>
         </div>
       </div>

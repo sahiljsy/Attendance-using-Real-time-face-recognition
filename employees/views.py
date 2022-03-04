@@ -7,6 +7,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+import os
 
 
 @login_required(login_url="http://127.0.0.1:8000/accounts/login/")
@@ -45,6 +46,18 @@ def logout_view(request):
 @login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def Display(request):
     return render(request, "display.html")
+
+@login_required(login_url="http://127.0.0.1:8000/accounts/login/")
+def Update_details(request):
+    if request.method == 'POST':
+        firstnm = request.POST.get('first', ' ')
+        lastnm = request.POST.get('last', ' ')
+        user = request.user.id
+        t = User.objects.filter(id=user).update(first_name=firstnm, last_name=lastnm)
+        messages.add_message(request, 25, 'Details updated successfully.')
+        return redirect("http://127.0.0.1:8000/")
+    else:
+        return render(request, "update_details.html")
 
 def notFound(request):
     return render(request, "404.html")
