@@ -13,14 +13,15 @@ import os
 from pathlib import Path
 from keras.models import load_model
 from django.contrib.messages import constants as messages
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 MESSAGE_TAGS = {
-        messages.DEBUG: 'alert-secondary',
-        messages.INFO: 'alert-info',
-        messages.SUCCESS: 'alert-dark',
-        messages.WARNING: 'alert-warning',
-        messages.ERROR: 'alert-danger',
- }
+    messages.DEBUG: 'alert-secondary',
+    messages.INFO: 'alert-info',
+    messages.SUCCESS: 'alert-dark',
+    messages.WARNING: 'alert-warning',
+    messages.ERROR: 'alert-danger',
+}
 
 MODEL =  load_model("cnn.h5")
 
