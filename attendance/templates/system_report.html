@@ -47,7 +47,6 @@
         /* box-shadow: 7px 10px 5px  rgb(190, 160, 148); */
         box-shadow: 5px 10px 10px rgb(46, 46, 102);
       }
-    </style>
   </head>
 
   <body>
@@ -57,6 +56,7 @@
       <div class="row">
         <div class="col">
           <div class="crd mt-4" id="detail-card">
+
             {% if error %}
             <h1 class="mx-auto">{{error}}</h1>
             {% else %}
@@ -149,11 +149,11 @@
                                 size:20
                               }
                             },
+
                             position: "top",
                           },
                           title: {
                             display: true,
-                            text: "Monthly report of {{month}}",
                             color:'green',
                             font:{
                               size: 25
@@ -176,6 +176,7 @@
                                 font:{
                                   size: 15
                                 },
+
                             }
                           }
                         },

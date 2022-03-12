@@ -247,6 +247,7 @@ def markmyAttendanceIn(request, name):
                 messages.add_message(request, 25, name + ', you have already checked in.')
 
 
+
 def update(header, data, filename):
     with open(filename, "w", newline="") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=header)
@@ -284,6 +285,7 @@ def markmyAttendanceOut(request, name):
                 else:
                     messages.add_message(
                         request, 25, request.user.username + ', you have already checked Out or haven\'t checked in.')
+
             else:
                 messages.add_message(
                     request, 25, request.user.username + ', First checked in.')
@@ -357,6 +359,7 @@ def open_camera(Encoded_labels, img_rows, img_cols):
         verify = []
         print("IN")
         cap = cv2.VideoCapture(0)
+
         print("IN")
         print("Camera opened")
         hogFaceDetector = dlib.get_frontal_face_detector()
@@ -468,7 +471,7 @@ def create_dataset(username):
     try:
         if(os.path.exists('./data') == False):
             os.makedirs('./data')
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(2)
         print("Camera opened")
         hogFaceDetector = dlib.get_frontal_face_detector()
         skip = 0
