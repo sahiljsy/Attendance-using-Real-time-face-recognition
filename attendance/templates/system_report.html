@@ -1,0 +1,277 @@
+<html>
+  <head>
+    {% load static %}
+    <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+    crossorigin="anonymous"
+  />
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://kit.fontawesome.com/6820971017.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"
+      integrity="sha256-ErZ09KkZnzjpqcane4SCyyHsKAXMvID9/xwbl/Aq1pc="
+      crossorigin="anonymous"
+    ></script>
+    <style>
+      .crd {
+        height: 100%;
+        margin:1%;
+        padding-top:1%;
+        cursor: pointer;
+        outline: none;
+        background-color: white;
+        border-radius: 5%;
+        /* box-shadow: 7px 10px 5px  rgb(190, 160, 148); */
+        box-shadow: 5px 10px 10px rgb(46, 46, 102);
+      }
+  </head>
+
+  <body>
+    {% load crispy_forms_tags %} {% load static %} {% load socialaccount %}
+    {%include 'navbar.html' %}
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <div class="crd mt-4" id="detail-card">
+
+            {% if error %}
+            <h1 class="mx-auto">{{error}}</h1>
+            {% else %}
+            <div class="row">
+              <div class="row justify-content-center my-3">
+                <div class="col mx-5">
+                  <form method="POST">
+                    {% csrf_token %}
+                    <div class="row">
+                      <div class="form-group col-3">
+                        <select
+                          class="form-control"
+                          id="file_name"
+                          name="file_name"
+                        >
+                          {%for file in csv%}
+                          <option>{{file}}</option>
+                          {%endfor%}
+                        </select>
+                      </div>
+                      <div class="col-3">
+                        <button type="submit" class="btn btn-warning mr-4">
+                          Generate Report
+                        </button>
+                      </div>
+                      <div class="col-4">
+                        <a
+                          class="btn btn-warning mx-3"
+                          href="http://127.0.0.1:8000/attendance/report/system"
+                          role="button"
+                          >Today's Report</a
+                        >
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+              <center>
+                <hr style="height: 2; width: 95%" />
+              </center>
+              <div class="row justify-content-center">
+                {%if monthly%}
+                <div class="col-10 md-2">
+                  <canvas id="myChart"></canvas>
+                  <script>
+                    const ctx = document.getElementById("myChart").getContext("2d");
+                    const myChart = new Chart(ctx, {
+                      type: "bar",
+                      data: {
+                        labels: [
+                        {% for d in date %}  '{{ d }}',  {% endfor %},
+                        ],
+                        datasets: [
+                          {
+                            label:"Present Employees",
+                            data: [{% for wh in no_of_emplyoee_Per_date %}  '{{ wh }}',  {% endfor %}],
+                            backgroundColor: [
+                              "rgba(255, 99, 132, 0.6)",
+                              "rgba(54, 162, 235, 0.6)",
+                              "rgba(255, 206, 86, 0.6)",
+                              "rgba(75, 192, 192, 0.6)",
+                              "rgba(153, 102, 255, 0.6)",
+                              "rgba(255, 159, 64, 0.6)",
+                            ],
+                            borderColor: [
+                              "rgba(255, 99, 132, 1)",
+                              "rgba(54, 162, 235, 1)",
+                              "rgba(255, 206, 86, 1)",
+                              "rgba(75, 192, 192, 1)",
+                              "rgba(153, 102, 255, 1)",
+                              "rgba(255, 159, 64, 1)",
+                            ],
+                            borderWidth: 1,
+                          },
+                          {
+                            label:"Half_day Employees",
+                            data: [{% for wh in no_of_employee_leave_early %}  '{{ wh }}',  {% endfor %}],
+                            backgroundColor: [
+                              "rgba(255, 0, 0, 1)",
+                            ],
+                          },
+                        ],
+                      },
+                      options: {
+                        plugins: {
+                          legend: {
+                            labels:{
+                              color:'red',
+                              font:{
+                                size:20
+                              }
+                            },
+
+                            position: "top",
+                          },
+                          title: {
+                            display: true,
+                            color:'green',
+                            font:{
+                              size: 25
+                            }
+                          },
+                        },
+                        scales: {
+                          y: {
+                            suggestedMin: 0,
+                            suggestedMax: {{no_user}} + 2,
+                            ticks: {
+                              font:{
+                                size: 20
+                              },
+                              stepSize: 1
+                            }
+                          },
+                          x: {
+                            ticks: {
+                                font:{
+                                  size: 15
+                                },
+
+                            }
+                          }
+                        },
+                      },
+                    });
+                  </script>
+                </div>
+                {% else %}
+                <div class="col-6 md-2">
+                  <canvas id="myChart"></canvas>
+                  <script>
+                    const ctx = document
+                      .getElementById("myChart")
+                      .getContext("2d");
+                    const myChart = new Chart(ctx, {
+                      type: "doughnut",
+                      data: {
+                        labels: ["Present", "Absent"],
+                        datasets: [
+                          {
+                            label: "Number Of Employees",
+                            data: ["{{ present }}", "{{ absent }}"],
+                            backgroundColor: [
+                              "rgba(0,200,0, 0.8)",
+                              "rgba(250, 0, 0, 0.8)",
+                            ],
+                            borderWidth: 5,
+                          },
+                        ],
+                      },
+                      options: {
+                        responsive: true,
+                        plugins: {
+                          legend: {
+                            position: "top",
+                          },
+                          title: {
+                            display: true,
+                            text: "Number Of Present Employee",
+                          },
+                          chartAreaBorder: {
+                            borderColor: "red",
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            borderDashOffset: 2,
+                          },
+                        },
+                      },
+                    });
+                  </script>
+                </div>
+                <div class="col-6 md-2">
+                  <canvas id="myChart1"></canvas>
+                  <script>
+                    const ctx1 = document
+                      .getElementById("myChart1")
+                      .getContext("2d");
+                    const myChart1 = new Chart(ctx1, {
+                      type: "doughnut",
+                      data: {
+                        labels: ["no_onTime", "no_late"],
+                        datasets: [
+                          {
+                            label: "Number Of Employees",
+                            data: ["{{ no_onTime }}", "{{ no_late }}"],
+                            backgroundColor: [
+                              "rgba(0, 200,0, 0.8)",
+                              "rgba(250, 0, 0, 0.8)",
+                            ],
+                            borderWidth: 5,
+                          },
+                        ],
+                      },
+                      options: {
+                        responsive: true,
+                        plugins: {
+                          legend: {
+                            position: "top",
+                          },
+                          title: {
+                            display: true,
+                            text: "Number Of On Time Employee",
+                          },
+                        },
+                      },
+                    });
+                  </script>
+                </div>
+                {%endif%}
+              </div>
+            </div>
+            {%endif%}
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

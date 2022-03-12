@@ -1,0 +1,68 @@
+#mypic {
+  height: 12rem;
+  width: 12rem;
+  margin: auto;
+  margin-top: 2%;
+}
+#mypic img {
+  height: 100%;
+  width: 100%;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0px 0px 6px 4px rgba(255, 196, 196, 1);
+  transition: all 1s ease-in;
+}
+
+#detail-card{
+    margin:auto ;
+    margin-top: 3%;
+    width:55%;
+    height: 100%;
+    opacity: 0.97;
+    border-radius: 5%;
+}
+
+p{
+    font-size: 1.5rem;
+    margin-left:30px;
+}
+button{
+    margin: auto;
+    width:30%;
+    margin-bottom: 3%;
+}
+hr{
+    height: 5px;
+    color:gray;
+    background-color:gray
+}
+
+@media only screen and (max-width: 760px) {
+
+  #mypic {
+    height: 6rem;
+    width: 6rem;
+    margin: auto;
+    margin-top: 2%;
+  }
+
+  #detail-card{
+    width:85%;
+    margin:auto ;
+    margin-top: 3%;
+    height: auto;
+    opacity: 0.97;
+    border-radius: 5%;
+}
+  .bars {
+    display: block;
+  }
+  .nav-menu {
+    display: none;
+  }
+  .card-body{
+    /* max-height: 50px !important; */
+    min-height: 50px !important;
+  
+  }
+}

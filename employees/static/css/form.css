@@ -1,0 +1,84 @@
+.form-control {
+  width: 100%;
+}
+.errorlist {
+  color: red;
+}
+
+.form-text {
+  color: red !important;
+  font-weight: bold;
+}
+label {
+  margin-top: 4%;
+  margin-bottom: 2%;
+  font-size: large;
+  color: rgb(48, 3, 3);
+  font-weight: bolder;
+}
+
+img {
+  width: 23%;
+  height: 15%;
+  margin-left: 36.5%;
+  margin-right: 36.5%;
+}
+
+.form {
+  width: 55%;
+  background-color: white;
+  opacity: 0.95;
+  border-radius: 25px;
+  padding: 2%;
+  box-shadow: 5px 10px 10px rgb(46, 46, 102);
+}
+input[type="submit"],
+.buttons {
+  width: 95%;
+  background-color: rgb(0, 140, 255);
+  color: white;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.buttons {
+  background-color: rgb(243, 53, 53);
+}
+
+input[type="submit"]:hover {
+  background-color: rgb(4, 4, 73);
+}
+input[type="checkbox"] {
+  margin-top: 6%;
+}
+
+.button-holder {
+  text-align: center;
+}
+
+.a {
+  float: right;
+  font-size: 17px;
+  /* color: white; */
+  text-decoration: none;
+}
+
+.buttons:hover {
+  background-color: rgb(204, 8, 8);
+}
+
+@media screen and (min-width: 992px) {
+  .form-control {
+    width: 100%;
+  }
+
+  img {
+    width: 24%;
+    height: 18%;
+  }
+
+  .form {
+    width: 40%;
+  }
+}
