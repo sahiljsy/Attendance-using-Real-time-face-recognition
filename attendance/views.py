@@ -87,12 +87,20 @@ def generateMonthlyReport(month, username=None):
         no_of_employee_leave_early = np.zeros(31)
 
     if username:
-        data = attendance_data.loc[attendance_data['Username'] == username]
-        # print(data)
-        checkIn = data['Check_in_time']
-        checkOut = data['Check_out_time']
-        date = data['Date']
-        # print(checkOut)
+        today = datetime.now()
+        print( (str(attendance_data["Date"]) !=  today.strftime("%d")))
+        data = attendance_data.loc[(attendance_data['Username'] == username) & (str(attendance_data["Date"]) !=  today.strftime("%d"))]
+        print(data)
+        checkIn = data['Check_in_time'].to_list()
+        checkOut = data['Check_out_time'].to_list()
+        date = data['Date'].to_list()
+        # date = data['Date']
+        # print(checkOut[133])
+        if len(date) == 0:
+            context["error"] = "Data is not available"
+            return context
+        print(len(date))
+        print(date)
         holidays = set(total_month_day) - set(date)
         if len(date) == 1:
             print("if")
@@ -100,6 +108,7 @@ def generateMonthlyReport(month, username=None):
                                      datetime.strptime(checkIn[0], '%H:%M:%S')).seconds)/3600
         else:
             print("else")
+            print(date[3])
             for d in range(len(date)):
                 working_hour[date[d]-1] = ((datetime.strptime(checkOut[d], '%H:%M:%S') -
                                             datetime.strptime(checkIn[d], '%H:%M:%S')).seconds)/3600
@@ -219,6 +228,7 @@ def markmyAttendanceIn(request, name):
             writer.writerow(["Username", "Date", "Check_in_time",
                             "Check_out_time", 'Late_check_in', 'early_check_out'])
             writer.writerow([name, date, timeString, None, late])
+            messages.add_message(request, 25, name + ', you have successfully checked in.')
     else:
         print("else")
         with open(file_name, 'r+', newline='') as file:
@@ -232,6 +242,9 @@ def markmyAttendanceIn(request, name):
             if flag:
                 print("new")
                 writer.writerow([name, date, timeString, None, late])
+                messages.add_message(request, 25, name + ', you have successfully checked in.')
+            else:
+                messages.add_message(request, 25, name + ', you have already checked in.')
 
 
 def update(header, data, filename):
@@ -270,7 +283,7 @@ def markmyAttendanceOut(request, name):
                         request, 25, request.user.username + ', you have successfully checked Out.')
                 else:
                     messages.add_message(
-                        request, 25, request.user.username + ', you have already checked Out.')
+                        request, 25, request.user.username + ', you have already checked Out or haven\'t checked in.')
             else:
                 messages.add_message(
                     request, 25, request.user.username + ', First checked in.')
@@ -331,6 +344,7 @@ def generate_Labels():
         Enc_labels = []
         for i in Labels:
             Enc_labels.append(Encoded_dict[i])
+        print(Enc_labels)
         return Encoded_labels
     except Exception as e:
         print("Error occured: ", e)
@@ -342,7 +356,7 @@ def open_camera(Encoded_labels, img_rows, img_cols):
         print("IN")
         verify = []
         print("IN")
-        cap = cv2.VideoCapture(2)
+        cap = cv2.VideoCapture(0)
         print("IN")
         print("Camera opened")
         hogFaceDetector = dlib.get_frontal_face_detector()
@@ -381,6 +395,7 @@ def open_camera(Encoded_labels, img_rows, img_cols):
                 break
         cap.release()
         cv2.destroyAllWindows()
+        print(ynew)
         best_prediction = max(set(verify), key=verify.count)
         return best_prediction
     except Exception as e:
@@ -400,8 +415,6 @@ def checkin(request):
         if(request.user.username == best_prediction):
             print("Valid")
             markmyAttendanceIn(request, best_prediction)
-            messages.add_message(
-                request, 25, best_prediction + ', you have successfully checked in.')
         else:
             print("Invalid")
             messages.add_message(
@@ -442,14 +455,20 @@ def checkout(request):
 
 @ login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def mark_attendance(request):
-    return render(request, "mark_attendance.html")
+    check = settings.IS_TRAINING
+    if check == False:
+        return render(request, "mark_attendance.html")
+    else:
+        messages.add_message(
+                request, 25, 'Sorry, right now system is getting trained. Please wait...')
+        return redirect("http://127.0.0.1:8000/")
 
 
 def create_dataset(username):
     try:
         if(os.path.exists('./data') == False):
             os.makedirs('./data')
-        cap = cv2.VideoCapture(2)
+        cap = cv2.VideoCapture(0)
         print("Camera opened")
         hogFaceDetector = dlib.get_frontal_face_detector()
         skip = 0
@@ -508,10 +527,15 @@ def take_data(request):
     else:
         return render(request, "takedata.html")
 
+def returnRes(request):
+    print("IN")
+    return redirect("http://127.0.0.1:8000/eheth")
 
 @ login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def trainmodel(request):
     try:
+        settings.IS_TRAINING = True
+        print(settings.IS_TRAINING)
         data_path = "./data/"
         Training_Data = []
         Labels = []
@@ -566,22 +590,19 @@ def trainmodel(request):
         print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
 
         model = Sequential()
-        model.add(Conv2D(filters=40, kernel_size=(3, 3), padding='Same',
-                         activation='relu', input_shape=(128, 128, 1)))
+        model.add(Conv2D(filters=40, kernel_size=(3, 3), padding='Same', activation='relu', input_shape=(128, 128, 1)))
         model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Dropout(0.25))
-        model.add(Conv2D(filters=60, kernel_size=(2, 2),
-                         padding='Same', activation='relu'))
+        model.add(Conv2D(filters=60, kernel_size=(2, 2), padding='Same', activation='relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Dropout(0.25))
-        model.add(Conv2D(filters=160, kernel_size=(
-            3, 3), padding='Same', activation='relu'))
+        model.add(Conv2D(filters=160, kernel_size=(3, 3), padding='Same', activation='relu'))
         model.add(Flatten())
         model.add(Dense(128, activation="relu"))
         model.add(Dropout(0.5))
         model.add(Dense(no_of_labels, activation="softmax"))
-        model.compile(optimizer='adam',
-                      loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+        model.compile(optimizer='adam',loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+        
         model.summary()
         model.fit(x=x_train, y=y_train, epochs=20)
 
@@ -589,7 +610,8 @@ def trainmodel(request):
         scor = model.evaluate(np.array(x_test),  np.array(y_test))
         print('test los {:.4f}'.format(scor[0]))
         print('test acc {:.4f}'.format(scor[1]))
-        model.save("cnn.h5")
+        model.save("cnn.h5")        
     except Exception as e:
         print("Error occured: ", e)
+    settings.IS_TRAINING = False
     return redirect("http://127.0.0.1:8000/")

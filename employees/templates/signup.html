@@ -11,45 +11,56 @@
   <link rel="stylesheet" href="{% static 'css/style.css' %}" />
   <link rel="stylesheet" href="{% static 'css/form.css' %}" />
   <style>
-    img {
-      width: 22%;
-      height: 15%;
-      margin-left: 36.5%;
-      margin-right: 36.5%;
-    }
-
-    .form-text {
-      color: white !important;
-    }
-
     .form {
-      width: 85%;
-      background-color: rgba(247, 243, 243, 0.3);
-      border-radius: 25px;
-      padding: 2%;
+      width: 90%;
       margin-left: auto;
-      margin-right: 5%;
+      margin-right: 6%;
     }
 
-    h2 {
+    h3 {
       text-align: center;
       color: white;
     }
 
-    @media screen and (min-width: 992px) {
-      .form-control {
-        width: 100%;
-      }
+    h1{
+      color:white;
+      text-align:center;
+      font-family:Lucida;
+      margin: 2%;              
+    }
 
+    @keyframes example {
+      0% { transform: rotate(5deg); }
+      100% { transform: rotate(-5deg); }
+  }
+
+    .logos{
+      height: 55%;
+      width: 50%;
+      border-radius: 100%;
+      margin-left: 25%;
+      margin-top: 5%;
+      box-shadow: 0px 0px 6px 6px rgba(255, 196, 196, 1);
+      animation: example ease-in-out 1s infinite alternate;
+    }
+    #intro{
+      position: relative;
+    }
+
+    @media screen and (min-width: 992px) {
       .form {
-        width: 55%;
-        float: right;
         padding: 2%;
         margin-right: 0;
+        margin-bottom: 2%;
       }
-
-      .a{
-        margin-bottom: 1%;
+      .logos{
+        height: 400;
+        width: 62%;
+        margin-left: 20%;
+        margin-top: 5%;
+      }
+      #intro{
+        position: Fixed;
       }
     }
 
@@ -65,28 +76,42 @@
   {% load socialaccount %}
   {% load crispy_forms_tags %}
   {% block content %}
-  <div class="container" style="margin: 1% auto;padding-top: 3%;padding-bottom: 3%;">
-    <div class="form">
-    <form method="post">
-      {% csrf_token %}
-      <img src="{% static 'images/user.png' %}"  style=" border-radius: 150px;"/>
-      <h2>User Registration</h2>
-      <hr />
-      {{ form|crispy }}
-      <a class="a" href="http://127.0.0.1:8000/accounts/login/">already have an account? Login Now!</a>
-      
-      <br /><br>
-      <div class="button-holder">
-        <input type="submit" />
+  <div class="container" style="padding-top: 2%;">
+    <div class="row">
+      <div id="intro" class="col-sm-6">
+        <h1 style="">Attendance Management System</h1>
+        <img 
+        class="logos" src="{% static 'images/logo.jpg' %}" height="600"/>
       </div>
-    </form>
-    <div class="button-holder">
-      <a href="{% provider_login_url 'google' %}"><button class="buttons">Sign In with Google</button></a>
+      <div class="col-sm-6 offset-sm-6">
+        <div class="form">
+          <form method="post">
+            {% csrf_token %}
+            <img src="{% static 'images/user.png' %}"  style=" border-radius: 150px;"/>
+            <h2>User Registration</h2>
+            <hr />
+            {{ form|crispy }}
+            <a class="a" href="http://127.0.0.1:8000/accounts/login/">already have an account? Login Now!</a>
+            
+            <br /><br>
+            <div class="button-holder">
+              <input type="submit" value="Submit"/>
+            </div>
+          </form>
+          <div class="button-holder">
+            <a href="{% provider_login_url 'google' %}"><button class="buttons">Sign In with Google</button></a>
+          </div>
+      </div>
     </div>
   </div>
-  </div>
-  {% endblock %}
-   
+  {% endblock %}  
+  <script>
+    {% comment %} if (window.innerWidth < 12) {
+      console.log("hii"); {% endcomment %}
+      $('#intro').removeClass('Fixed-Top');
+      $('#intro').addClass('Fixed');
+    {% comment %} } {% endcomment %}
+  </script>
 </body>
 
 </html>

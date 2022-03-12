@@ -1,7 +1,9 @@
 body {
   height: 100%;
   margin: 0;
-  background-image: url("../images/bakc1.jpg");
+  /* background-image: url("../images/bakc1.jpg"); */
+  background-color: black;
+  /* background-image: linear-gradient(rgb(0, 0, 0), rgb(202, 202, 182)); */
   background-repeat: no-repeat;
   background-size: cover;
   background-attachment: fixed;
@@ -101,7 +103,16 @@ body {
     min-height: 50px;
   }
 }
+.card:hover {background-color: rgb(222, 225, 230);color:red;}
+
+.card:active {
+  background-color: rgb(222, 225, 230);
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
+}
 .card {
+  cursor: pointer;
+  outline: none;
   background-color: white;
   border-radius: 5%;
   /* box-shadow: 7px 10px 5px  rgb(190, 160, 148); */

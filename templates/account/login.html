@@ -15,7 +15,7 @@
     ></script>
     <style>
       .form {
-        width: 80%;
+        width: 95%;
         margin-left: auto;
         margin-right: 8%;
       }
@@ -25,40 +25,78 @@
         color: white;
       }
 
+      h1{
+        color:white;
+        text-align:center;
+        font-family:Lucida;
+        position: relative;
+                
+      }
+
+      @keyframes example {
+        0% { transform: rotate(5deg); }
+        100% { transform: rotate(-5deg); }
+    }
+
+      .logos{
+        height: 55%;
+        width: 50%;
+        border-radius: 100%;
+        margin-left: 25%;
+        margin-top: 5%;
+        box-shadow: 0px 0px 6px 6px rgba(255, 196, 196, 1);
+        animation: example ease-in-out 1s infinite alternate;
+      }
+
       @media screen and (min-width: 992px) {
         .form {
-          width: 40%;
-          float: right;
           padding: 2%;
           margin-right: 0;
+          margin-bottom: 2%;
+        }
+        .logos{
+          height: 62%;
+          width: 58%;
+          margin-left: 20%;
+          margin-top: 8%;
         }
       }
     </style>
   </head>
 
-  <body>
+  <body>    
     {% load crispy_forms_tags %} {% load static %} {% load socialaccount %}
      {% comment %} {%include '../navbar.html' %} {% endcomment %}
     <div class="container" style="padding-top: 2%">
-      <div class="form" style="">
-        <form method="POST">
-          {% csrf_token %}
-          <img src="{% static 'images/user.png' %}" />
-          <hr />
-          {{ form|crispy }}
-
-          <a class="a" href="http://127.0.0.1:8000/signup/"
-            >don't have an account? Signup Now!</a
-          >
-          <br /><br />
-          <div class="button-holder">
-            <input type="submit" value="Login" />
+      <div class="row">
+        <div class="col-sm-7">
+          <h1 style="">Attendance Management System</h1>
+          <img 
+          class="logos" src="{% static 'images/logo.jpg' %}" />
+        </div>
+        <div class="col-sm-5">
+          <div class="form" style="margin-right:auto;margin-left:auto;">
+        
+            <form method="POST">
+              {% csrf_token %}
+              <img src="{% static 'images/user.png' %}" />
+              <hr />
+              {{ form|crispy }}
+    
+              <a class="a" href="http://127.0.0.1:8000/signup/"
+                >don't have an account? Signup Now!</a
+              >
+              <br /><br />
+              <div class="button-holder">
+                <input type="submit" value="Login" />
+              </div>
+            </form>
+            <div class="button-holder">
+              <a href="{% provider_login_url 'google' %}">
+                <button class="buttons">Sign In with Google</button>
+              </a>
+            </div>
           </div>
-        </form>
-        <div class="button-holder">
-          <a href="{% provider_login_url 'google' %}">
-            <button class="buttons">Sign In with Google</button>
-          </a>
         </div>
       </div>
     </div>

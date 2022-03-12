@@ -17,7 +17,8 @@
     margin:auto ;
     margin-top: 3%;
     width:55%;
-    opacity: .85;
+    height: 100%;
+    opacity: 0.97;
     border-radius: 5%;
 }
 
@@ -50,7 +51,7 @@ hr{
     margin:auto ;
     margin-top: 3%;
     height: auto;
-    opacity: .85;
+    opacity: 0.97;
     border-radius: 5%;
 }
   .bars {

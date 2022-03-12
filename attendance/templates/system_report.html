@@ -2,11 +2,14 @@
   <head>
     {% load static %}
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
-      crossorigin="anonymous"
-    />
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+    crossorigin="anonymous"
+  />
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
     <script
       src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
@@ -32,6 +35,19 @@
       integrity="sha256-ErZ09KkZnzjpqcane4SCyyHsKAXMvID9/xwbl/Aq1pc="
       crossorigin="anonymous"
     ></script>
+    <style>
+      .crd {
+        height: 100%;
+        margin:1%;
+        padding-top:1%;
+        cursor: pointer;
+        outline: none;
+        background-color: white;
+        border-radius: 5%;
+        /* box-shadow: 7px 10px 5px  rgb(190, 160, 148); */
+        box-shadow: 5px 10px 10px rgb(46, 46, 102);
+      }
+    </style>
   </head>
 
   <body>
@@ -40,7 +56,7 @@
     <div class="container">
       <div class="row">
         <div class="col">
-          <div class="card mt-4" id="detail-card">
+          <div class="crd mt-4" id="detail-card">
             {% if error %}
             <h1 class="mx-auto">{{error}}</h1>
             {% else %}
@@ -62,7 +78,7 @@
                         </select>
                       </div>
                       <div class="col-3">
-                        <button type="submit" class="btn btn-warning mx-3">
+                        <button type="submit" class="btn btn-warning mr-4">
                           Generate Report
                         </button>
                       </div>
@@ -127,32 +143,39 @@
                       options: {
                         plugins: {
                           legend: {
+                            labels:{
+                              color:'red',
+                              font:{
+                                size:20
+                              }
+                            },
                             position: "top",
                           },
                           title: {
                             display: true,
                             text: "Monthly report of {{month}}",
-                            fontSize: 20
-                          },
-                          x: {
-                            ticks: {
-                                fontSize: 30,
-                                fontColor: "red"
+                            color:'green',
+                            font:{
+                              size: 25
                             }
-                          }
+                          },
                         },
                         scales: {
                           y: {
                             suggestedMin: 0,
                             suggestedMax: {{no_user}} + 2,
                             ticks: {
+                              font:{
+                                size: 20
+                              },
                               stepSize: 1
                             }
                           },
                           x: {
                             ticks: {
-                                fontSize: 30,
-                                fontColor: "red"
+                                font:{
+                                  size: 15
+                                },
                             }
                           }
                         },

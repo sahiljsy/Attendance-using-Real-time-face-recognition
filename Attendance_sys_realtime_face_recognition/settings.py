@@ -24,6 +24,7 @@ MESSAGE_TAGS = {
 }
 
 MODEL =  load_model("cnn.h5")
+IS_TRAINING = False
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

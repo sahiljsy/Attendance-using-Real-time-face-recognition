@@ -35,6 +35,9 @@ def Login(request):
         user = authenticate(request, username = username, password = password)
         if user is not None:
             form = login(request, user)
+            request.session['allow_attendance'] = True
+            allow_attendance = request.session.get('allow_attendance')
+            print(allow_attendance)
             return redirect("http://127.0.0.1:8000/")
     form = AuthenticationForm()
     return render(request, 'login.html', {'form':form})
