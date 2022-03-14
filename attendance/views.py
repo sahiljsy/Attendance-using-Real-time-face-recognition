@@ -1,3 +1,4 @@
+from urllib import request
 from django.conf import settings
 from django.http import HttpResponse
 from keras import backend as K
@@ -22,7 +23,7 @@ import pandas as pd
 from datetime import datetime
 import matplotlib.dates as mdates
 import cv2
-import dlib
+# import dlib
 import os
 
 
@@ -62,7 +63,6 @@ def generateTodayReport():
 def generateMonthlyReport(month, username=None):
     month_name = month.split('_')[0]
     month1 = ['Apr', "Jun", 'Sep', 'Nov']
-    # month2 = ['Jan', 'Mar', 'May', 'Jul', 'Aug', "Oct", 'Dec']
     context = {}
     context['month'] = month
     filename = "attendance_"+month+".csv"
@@ -87,37 +87,24 @@ def generateMonthlyReport(month, username=None):
         no_of_employee_leave_early = np.zeros(31)
 
     if username:
-        today = datetime.now()
-        print( (str(attendance_data["Date"]) !=  today.strftime("%d")))
-        data = attendance_data.loc[(attendance_data['Username'] == username) & (str(attendance_data["Date"]) !=  today.strftime("%d"))]
-        print(data)
-        checkIn = data['Check_in_time'].to_list()
-        checkOut = data['Check_out_time'].to_list()
-        date = data['Date'].to_list()
-        # date = data['Date']
-        # print(checkOut[133])
+        data = attendance_data.loc[(attendance_data['Username'] == username)]
+        data = data.dropna()
+        data = data.reset_index(drop=True)
+#         print(data)
+        checkIn = data['Check_in_time']
+        checkOut = data['Check_out_time']
+        date = data['Date']
         if len(date) == 0:
             context["error"] = "Data is not available"
             return context
-        print(len(date))
-        print(date)
-        holidays = set(total_month_day) - set(date)
-        if len(date) == 1:
-            print("if")
-            working_hour[date-1] = ((datetime.strptime(checkOut[0], '%H:%M:%S') -
-                                     datetime.strptime(checkIn[0], '%H:%M:%S')).seconds)/3600
-        else:
-            print("else")
-            print(date[3])
-            for d in range(len(date)):
-                working_hour[date[d]-1] = ((datetime.strptime(checkOut[d], '%H:%M:%S') -
-                                            datetime.strptime(checkIn[d], '%H:%M:%S')).seconds)/3600
+        for d in range(len(date)):
+            working_hour[date[d]-1] = round(((datetime.strptime(checkOut[d], '%H:%M:%S') -
+                                            datetime.strptime(checkIn[d], '%H:%M:%S')).seconds)/3600, 2)
         context['date'] = total_month_day
         context['working_hour'] = working_hour
-
+        
     else:
         unique_date = np.unique(attendance_data['Date'])
-        holidays = set(total_month_day) - set(unique_date)
         for d in unique_date:
             print(d)
             date_data = attendance_data.loc[attendance_data['Date'] == d]
@@ -132,9 +119,51 @@ def generateMonthlyReport(month, username=None):
     return context
 
 
+def generateMonthlyReportOfTime(month, username):
+    month_name = month.split('_')[0]
+    month1 = ['Apr', "Jun", 'Sep', 'Nov']
+    context = {}
+    context['month'] = month
+    filename = "attendance_"+month+".csv"
+    if exists(filename) == False:
+        context["error"] = "Data is not available"
+        return context
+    attendance_data = pd.read_csv(filename)
+    if month_name == 'Feb':
+        total_month_day = np.arange(1, 29)
+        check_in = np.empty(29)
+        check_out = np.empty(29)
+    elif month_name in month1:
+        total_month_day = np.arange(1, 31)
+        check_in = np.zeros(30)
+        check_out = np.zeros(30)
+    else:
+        total_month_day = np.arange(1, 32)
+        check_in = np.zeros(31)
+        check_out = np.zeros(31)
+    today = datetime.now()
+    data = attendance_data.loc[(attendance_data['Username'] == username)]
+    if len(data) == 0:
+        context["error"] = "Data is not available"
+        return context
+    data = data.reset_index(drop=True)
+    checkIn = data['Check_in_time']
+    checkOut = data['Check_out_time']
+    date = data['Date']
+    for d in range(len(date)):
+        if (type(checkOut[d]) == type('')):
+            check_out_time = datetime.strptime(checkOut[d], '%H:%M:%S')
+            check_out[date[d]-1] = str(check_out_time.hour)+ "." + str(check_out_time.minute)
+        check_in_time = datetime.strptime(checkIn[d], '%H:%M:%S')
+        check_in[date[d]-1] = str(check_in_time.hour) + "." + str(check_in_time.minute)
+    context['date'] = total_month_day
+    context['check_in_time'] = check_in
+    context['check_out_time'] = check_out
+    context['emp_name'] = username
+    return context
+
 def get_csv():
-    prefixed = [filename for filename in os.listdir(
-        '.') if filename.startswith("attendance_")]
+    prefixed = [filename for filename in os.listdir('.') if filename.startswith("attendance_")]
     month = []
     year = []
     for file in prefixed:
@@ -165,6 +194,29 @@ def person_report(request):
     context['csv'] = available_csv
     return render(request, "person_report.html", context=context)
 
+@ login_required(login_url="http://127.0.0.1:8000/accounts/login/")
+def employee_report(request):
+    available_csv = get_csv()
+    today = datetime.now()
+    context= {}
+    filename = today.strftime("%b")+"_"+today.strftime("%y")
+    if request.method == 'POST':
+        if request.user.is_superuser:
+            employee = request.POST["emp_name"]
+            try:
+                check_employee = User.objects.get(username=employee)
+            except :
+                context["error"] = "Employee "+employee+" Does't Exists!"
+                return render(request, "employee_report.html", context=context)
+        else:
+            employee = request.user.username
+        filename = request.POST["file_name"]
+        context = generateMonthlyReportOfTime(filename, employee)
+    else:
+        context = generateMonthlyReportOfTime(filename, request.user.username)
+    context['csv'] = available_csv
+    print(context)
+    return render(request, "employee_report.html", context=context)
 
 @ login_required(login_url="http://127.0.0.1:8000/accounts/login/")
 def system_report(request):
@@ -184,32 +236,6 @@ def system_report(request):
     context['csv'] = available_csv
     print(context)
     return render(request, "system_report.html", context=context)
-
-# def markmyAttendanceIn(name):
-#     if exists('attendance.csv') == False:
-#         print("if")
-#         with open('attendance.csv', 'w+', newline='') as file:
-#             writer = csv.writer(file)
-#             writer.writerow(
-#                 ["Username", "Date", "Check_in_time", "Check_out_time"])
-#             now = datetime.now()
-#             dateString = now.strftime('%d-%b-%y')
-#             timeString = now.strftime('%H:%M:%S')
-#             writer.writerow([name, dateString, timeString])
-#     else:
-#         print("else")
-#         with open('attendance.csv', 'r+', newline='') as file:
-#             reader = [row for row in csv.DictReader(file)]
-#             now = datetime.now()
-#             dateString = now.strftime('%d-%b-%y')
-#             timeString = now.strftime('%H:%M:%S')
-#             flag = True
-#             for row in reader:
-#                 if row['Username'] == name and row['Date'] == dateString:
-#                     flag = False
-#             if flag:
-#                 print("new")
-#                 file.writelines(f'{name},{dateString},{timeString}')
 
 
 def markmyAttendanceIn(request, name):
@@ -294,28 +320,6 @@ def markmyAttendanceOut(request, name):
             request, 25, request.user.username + ', First checked in.')
 
 
-# def markmyAttendanceOut(name):
-#     if exists('attendance.csv'):
-#         with open('attendance.csv', newline='') as file:
-#             reader = [row for row in csv.DictReader(file)]
-#             readHeader = reader[0].keys()
-#             flag = False
-#             now = datetime.now()
-#             dateString = now.strftime('%d-%b-%y')
-#             timeString = now.strftime('%H:%M:%S')
-#             for row in reader:
-#                 if row['Username'] == name and row['Date'] == dateString and row['Check_in_time'] != None and row['Check_out_time'] == None:
-#                     flag = True
-#                     row['Check_out_time'] = timeString
-#             print(flag)
-#             if flag:
-#                 update(readHeader, reader, 'attendance.csv')
-#             else:
-#                 print("First cehck in or You have already Check out")
-#     else:
-#         print("First cehck in")
-
-
 def generate_Labels():
     try:
         data_path = "./data/"
@@ -346,7 +350,7 @@ def generate_Labels():
         Enc_labels = []
         for i in Labels:
             Enc_labels.append(Encoded_dict[i])
-        print(Enc_labels)
+        # print(Enc_labels)
         return Encoded_labels
     except Exception as e:
         print("Error occured: ", e)
@@ -355,26 +359,27 @@ def generate_Labels():
 
 def open_camera(Encoded_labels, img_rows, img_cols):
     try:
-        print("IN")
         verify = []
-        print("IN")
-        cap = cv2.VideoCapture(0)
-
+        cap = cv2.VideoCapture(0,cv2.CAP_DSHOW)
+        face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
         print("IN")
         print("Camera opened")
-        hogFaceDetector = dlib.get_frontal_face_detector()
+        # hogFaceDetector = dlib.get_frontal_face_detector()
         cnt = 0
         while True:
-
             _, frame = cap.read()
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            faces = hogFaceDetector(gray, 1)
-            for (i, rect) in enumerate(faces):
-                x = rect.left()
-                y = rect.top()
-                w = rect.right() - x
-                h = rect.bottom() - y
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            # faces = hogFaceDetector(gray, 1)
+            # for (i, rect) in enumerate(faces):
+            #     x = rect.left()
+            #     y = rect.top()
+            #     w = rect.right() - x
+            #     h = rect.bottom() - y
+            print('here')
+            faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+            print('here...')
+
+            for (x,y,w,h) in faces:
                 face_cropped = frame[y:y+h, x:x+w]
                 face_cropped = cv2.resize(face_cropped, (128, 128))
                 face_cropped = cv2.cvtColor(face_cropped, cv2.COLOR_BGR2GRAY)
@@ -386,11 +391,9 @@ def open_camera(Encoded_labels, img_rows, img_cols):
                 verify.append(Encoded_labels[classes_x[0]])
                 color = (0, 0, 255)
                 text = "Hello user, Please see towards camera with"
-                cv2.putText(frame, text,
-                            (30, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
+                cv2.putText(frame, text,(30, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
                 text = "proper lighting for proper face recognition."
-                cv2.putText(frame, text,
-                            (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
+                cv2.putText(frame, text,(30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2, 2)
                 cnt = cnt + 1
             cv2.imshow("Face Landmarks", frame)
             key = cv2.waitKey(1) & 0xFF
@@ -439,12 +442,6 @@ def checkout(request):
         if(request.user.username == best_prediction):
             print("Valid")
             markmyAttendanceOut(request, best_prediction)
-            # if flag == True:
-            #     messages.add_message(
-            #         request, 25, best_prediction + ', you have successfully checked-out.')
-            # else:
-            #     messages.add_message(
-            #         request, 25, best_prediction + ', Please check-in first.')
         else:
             print("Invalid")
             messages.add_message(
@@ -473,18 +470,20 @@ def create_dataset(username):
             os.makedirs('./data')
         cap = cv2.VideoCapture(2)
         print("Camera opened")
-        hogFaceDetector = dlib.get_frontal_face_detector()
+        face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+        # hogFaceDetector = dlib.get_frontal_face_detector()
         skip = 0
         while True:
             _, frame = cap.read()
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            faces = hogFaceDetector(gray, 1)
-            for (i, rect) in enumerate(faces):
-                x = rect.left()
-                y = rect.top()
-                w = rect.right() - x
-                h = rect.bottom() - y
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+            # faces = hogFaceDetector(gray, 1)
+            # for (i, rect) in enumerate(faces):
+            for (x,y,w,h) in faces:
+                # x = rect.left()
+                # y = rect.top()
+                # w = rect.right() - x
+                # h = rect.bottom() - y
                 face_cropped = frame[y-5:y+h-5, x-5:x+w-5]
                 face_cropped = cv2.resize(face_cropped, (128, 128))
                 face_cropped = cv2.cvtColor(face_cropped, cv2.COLOR_BGR2GRAY)
@@ -552,7 +551,6 @@ def trainmodel(request):
             name = onlyfiles[i].split("_")
             name.pop()
             Labels.append('_'.join(name))
-            # Labels.append(onlyfiles[i].split("_")[0])
             Training_Data.append(np.asarray(images, dtype=np.uint8))
 
         Encoded_labels = []

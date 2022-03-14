@@ -1,5 +1,8 @@
 cnn.h5 filter=lfs diff=lfs merge=lfs -text
 <<<<<<< HEAD
+<<<<<<< HEAD
 *.h5 filter=lfs diff=lfs merge=lfs -text
+=======
+>>>>>>> 913bd3270eb2237fcc431129d3fc02060bafea89
 =======
 >>>>>>> 913bd3270eb2237fcc431129d3fc02060bafea89

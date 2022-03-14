@@ -54,35 +54,46 @@
       <div class="row my-3">
         <div class="col">
           <div class="crd mt-4">
-
             <div class="row justify-content-center my-3">
                 <div class="col mx-5">
                   <form method="POST">
                     {% csrf_token %}
                     <div class="row">
-                      <div class="form-group col-3">
-                        <select
-                          class="form-control"
-                          id="file_name"
-                          name="file_name"
-                        >
-                          {%for file in csv%}
-                          <option>{{file}}</option>
-                          {%endfor%}
-                        </select>
-                      </div>
-                      <div class="col-3">
-                        <button type="submit" class="btn btn-warning mx-3">
-                          Generate Report
-                        </button>
-                      </div>
-                      <div class="col-4">
-                        <button class="btn btn-warning mx-3">
-                          <a href="http://127.0.0.1:8000/attendance/report/employee">
-                          Get Timing Report
-                          </a>
-                        </button>
-                      </div>
+                      <div class="form-group col">
+                          <div class="row">
+                            {% if user.is_superuser %}
+                              <div class="col-4">
+                                Employee Name
+                                <input class="form-control" id="emp_name" name="emp_name" />
+                              </div>
+                            {%endif%}
+                            <div class="col-4">
+                              Month
+                              <select
+                                class="form-control"
+                                id="file_name"
+                                name="file_name"
+                              >
+                                {%for file in csv%}
+                                <option>{{file}}</option>
+                                {%endfor%}
+                              </select>
+                            </div>
+                            <div class="col-4 p-4">
+                              <button type="submit" class="btn btn-warning mx-3">
+                                Generate Report
+                              </button>
+                            </div>
+                            
+                          </div>
+                        </div>
+                        <div class="col-4 p-4">
+                          <button  class="btn btn-warning mx-3">
+                            <a href="http://127.0.0.1:8000/attendance/report/person">
+                              Get working_hour Report
+                            </a>
+                          </button>
+                        </div>
                     </div>
                   </form>
                 </div>
@@ -91,7 +102,9 @@
               <hr style="height: 2; width: 95%" />
             </center>
             {% if error %}
-              <h1 class="mx-auto"> {{error}}</h1>            
+            <div class="mx-auto">
+              <center><h1 style="margin-bottom:10" >{{error}}</h1>  </center>    
+            </div>      
             {% else %}
 
             <div class="row justify-content-center">
@@ -100,36 +113,38 @@
                 <script>
                   const ctx = document.getElementById("myChart").getContext("2d");
                   const myChart = new Chart(ctx, {
-                    type: "bar",
+                    type: "line",
                     data: {
                       labels: [
                       {% for d in date %}  '{{ d }}',  {% endfor %},
                       ],
                       datasets: [
                         {
-                          label:"Hours",
-                          data: [{% for wh in working_hour %}  '{{ wh }}',  {% endfor %}],
+                          label:"Check In",
+                          data: [{% for inTime in check_in_time %}  '{{ inTime }}',  {% endfor %}],
                           backgroundColor: [
-                            "rgba(255, 99, 132, 0.6)",
-                            "rgba(54, 162, 235, 0.6)",
-                            "rgba(255, 206, 86, 0.6)",
-                            "rgba(75, 192, 192, 0.6)",
-                            "rgba(153, 102, 255, 0.6)",
-                            "rgba(255, 159, 64, 0.6)",
+                            "rgba(10, 255, 0, 0.6)",
                           ],
                           borderColor: [
-                            "rgba(255, 99, 132, 1)",
-                            "rgba(54, 162, 235, 1)",
-                            "rgba(255, 206, 86, 1)",
-                            "rgba(75, 192, 192, 1)",
-                            "rgba(153, 102, 255, 1)",
-                            "rgba(255, 159, 64, 1)",
+                          "rgba(10, 255, 0, 0.6)",
                           ],
                           borderWidth: 1,
                         },
+                        {
+                            label:"Check Out time",
+                            data: [{% for outTime in check_out_time %}  '{{ outTime }}',  {% endfor %}],
+                            backgroundColor: [
+                              "rgba(255, 0, 0, 0.6)",
+                            ],
+                            borderColor: [
+                              "rgba(255, 0, 0, 1)",
+                            ],
+                            borderWidth: 1,
+                          },
                       ],
                     },
                     options: {
+                        responsive: true,
                       plugins: {
                         legend: {
                           labels:{
@@ -143,7 +158,7 @@
                         },
                         title: {
                           display: true,
-                          text: "Monthly report of {{month}}",
+                          text: "Monthly report of {{month}} for {{emp_name}}",
                           color:'green',
                           font:{
                             size: 25
@@ -152,12 +167,12 @@
                       },
                       scales: {
                         y: {
-                          suggestedMin: 0,
-                          suggestedMax: 12,
+                          min: 0,
+                          max: 22,
                           ticks: {
                             stepSize: 1,
                             display: true,
-                            title: "Hours", 
+                            title: "In Time", 
                             font:{
                               size:20
                             }  
@@ -165,7 +180,10 @@
                           
                         },
                         x: {
-                          ticks: {                      
+                          ticks: {
+                            beginAtZero: true,
+                            display: true, 
+                            title: "Date",                      
                             font:{
                               size:18
                             }  
