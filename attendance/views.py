@@ -147,6 +147,7 @@ def generateMonthlyReportOfTime(month, username):
         context["error"] = "Data is not available"
         return context
     data = data.reset_index(drop=True)
+    # print(data)
     checkIn = data['Check_in_time']
     checkOut = data['Check_out_time']
     date = data['Date']
