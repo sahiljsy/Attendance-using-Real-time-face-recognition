@@ -366,7 +366,7 @@ def open_camera(Encoded_labels, img_rows, img_cols):
         # face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
         print("IN")
         print("Camera opened")
-        hogFaceDetector = dlib.get_frontal_face_detector()
+        # hogFaceDetector = dlib.get_frontal_face_detector()
         cnt = 0
         while True:
             _, frame = cap.read()
@@ -505,6 +505,7 @@ def create_dataset(username):
                 w = rect.right() - x
                 h = rect.bottom() - y
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
                 face_cropped = frame[y-5:y+h-5, x-5:x+w-5]
                 face_cropped = cv2.resize(face_cropped, (128, 128))
                 face_cropped = cv2.cvtColor(face_cropped, cv2.COLOR_BGR2GRAY)
