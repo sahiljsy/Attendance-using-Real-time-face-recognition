@@ -366,7 +366,7 @@ def open_camera(Encoded_labels, img_rows, img_cols):
         # face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
         print("IN")
         print("Camera opened")
-        # hogFaceDetector = dlib.get_frontal_face_detector()
+        hogFaceDetector = dlib.get_frontal_face_detector()
         cnt = 0
         while True:
             _, frame = cap.read()
